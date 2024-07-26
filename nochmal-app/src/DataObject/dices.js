@@ -1,17 +1,8 @@
 // {step: 0, taken: false, name: "c", value: "g", id: "diceroll-box-rn-1"},  {step: 0, taken: false, name: "n", value: 3, id: "diceroll-box-rc-2"}
 export let diceBoxes = [];
-export let diceState = "init"; // states: dice-rolled --->> wait -> play(play-dicePick -> play-tableCross) -> re-roll
 let numberPicked = -1;
 let colorPicked = "white";
-let canIRollNext = true;
-
-export const getCanIRollNext = () =>{
-    return canIRollNext;
-}
-
-export const setCanIRollNext = (value) =>{
-    canIRollNext = value;
-}
+let alreadyPickedIds = []
 
 export const setDiceBoxes = (newDices) =>{
     diceBoxes = [...newDices];
@@ -19,9 +10,6 @@ export const setDiceBoxes = (newDices) =>{
 }
 
 export const isButtonAllowedByDice = (bo) =>{
-    // if(bo.clr !== colorPicked) return false;
-    // if(numberPicked === 0) return false;
-    if(diceState !== "play-tableCross") return false;
     return (bo.clr !== colorPicked || numberPicked === 0) ? false : true;
 }
 
@@ -33,22 +21,14 @@ export const getPickCountLeft = () =>{
     return numberPicked;
 }
 
-export const howManyTaken = () =>{
-    let count = 0;
-    diceBoxes.forEach((db) =>{
-        if(db.taken) count++;
-    });
-    return count;
+export const whatStepOfDices = () =>{
+    return diceBoxes[0].step;
 }
 
-
-export const setDiceState = (newState) =>{
-    diceState = newState;
-}
 
 export const setPickedValue = (bo) =>{
     diceBoxes.forEach((db) =>{
-        if(bo.id === db.id){
+        if(bo.id === db.id && !alreadyPickedIds.includes(db.id)){
             if(bo.id.includes("-rn-") && numberPicked === -1){
                 numberPicked = parseInt(bo.txt);
                 db.taken = true;
@@ -77,11 +57,17 @@ export const setPickedValue = (bo) =>{
 function resetPickedValues(){
     numberPicked = -1;
     colorPicked = "white";
+    alreadyPickedIds = [];
+    diceBoxes.forEach((db) =>{
+        if(db.taken === true){
+            alreadyPickedIds.push(db.id);
+        }
+    })
 }
 
 export const setSpecialValue = (whichType, valuePicked) =>{
     if(whichType === "color") colorPicked = valuePicked;
-    else if(whichType === "number") numberPicked = valuePicked;
+    else if(whichType === "number") numberPicked = parseInt(valuePicked);
 }
 
 

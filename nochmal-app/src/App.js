@@ -19,9 +19,10 @@ import {socket, msgServerWithId, putPlayerId, msgReciever} from "./connection.js
 import {starterTable, starterLetterScore, starterColorScore, 
   starterFinalScore, starterWishScore} from "./DataObject/do.js";
 
-import { diceBoxes, diceState, setDiceBoxes, setDiceState, setPickedValue, 
-  isButtonAllowedByDice, decreasePickCount, getPickCountLeft, howManyTaken, 
-  getCanIRollNext, setCanIRollNext, setWishPickList } from './DataObject/dices.js';
+import { diceBoxes, setDiceBoxes, setPickedValue, isButtonAllowedByDice, setSpecialValue,
+  decreasePickCount, getPickCountLeft, whatStepOfDices, setWishPickList } from './DataObject/dices.js';
+
+import {gameAllow, setGameStatus, getGameStatus, canRollDice, setCanIRollNext} from './gamePlay.js';
 
 
   // https://github.com/WebDevSimplified/Learn-React-In-30-Minutes/blob/master/src/App.js
@@ -36,6 +37,7 @@ const App = () => {
   const [playerId, setPlayerId] = useState("");
   const [roulette, setRoulette] = useState(getRandomRoll());
   const [finalScore, setFinalScore] = useState(starterFinalScore);
+  const [rollerText, setRollerText] = useState("Roll Dice");
   // const [logConsole, setLogConsole] = useState('Log Console: ');  // JSON.stringify(colorStats)
 
 
@@ -90,7 +92,7 @@ const App = () => {
       j = getColumnIndex(bo.id.charAt(0));
 
       // check if button clicked is even allowed based on the dice rolled
-      let isAllowed = isButtonAllowedByDice(bo);
+      let isAllowed =getGameStatus !== "play-tableCross" && isButtonAllowedByDice(bo);
 
       let canCross = isAllowed && mainTableButtonCrossCheck(bo, i, j);
 
@@ -104,59 +106,74 @@ const App = () => {
         // if all pick counts are used, set the dice state to wait-reroll
         let leftPicks = getPickCountLeft();
         if(leftPicks === 0) {
-          setDiceState("wait-reroll");
+          setGameStatus("re-roll");
 
-          let time = Math.floor(Date.now() / 1000); // number of seconds since Unix epoch
-          msgServerWithId("waiting-for-reroll", time)
+          // let time = Math.floor(Date.now() / 1000); // number of seconds since Unix epoch
+          // msgServerWithId("waiting-for-reroll", time)
         }
       }
     }
-    else if(buttonType === "opt"){
-      // pick optional choice
-    }
     else if(buttonType === "Roulette-Button"){
-      let allowedToRollNow = true || getCanIRollNext();
+      // let allowedToRollNow = true || getCanIRollNext();
 
-      if(diceState === "init" || diceState === "re-roll" || allowedToRollNow){ //  || getCanIRollNext()
-        setDiceBoxes(getRandomRoll())
-        setRoulette(diceBoxes);
-        let left = wishPick.leftCount;
-        setWishPick({leftCount: left, type: 'number', valueList: [left, left, left]});
-        setDiceState("play-dicePick");
-        setCanIRollNext(false);
-        msgServerWithId("dice-rolled", diceBoxes);
+      if( rollerText === "Turn Over" || gameAllow( canRollDice() ) ){
+
+        if(rollerText === "Roll Dice"){
+          setDiceBoxes(getRandomRoll())
+          setRoulette(diceBoxes);
+          setWishPick({leftCount: wishPick.leftCount, type: 'number', valueList: []});
+          
+          setGameStatus("play-dicePick");
+          setCanIRollNext(false);
+
+          msgServerWithId("dice-rolled", diceBoxes);
+        }
+        else if(rollerText === "Turn Over"){
+          setRollerText("Roll Dice");
+          setGameStatus("re-roll");
+        }
+
+        
       }
       
     }
     else if(buttonType === "roll-box"){
 
-      if(diceState === "play-dicePick"){
-        
-        let pickedCount = setPickedValue(bo);
+      if(gameAllow(getGameStatus() === "play-dicePick")){
 
         // wishPick
         if(bo.clr === 'n'){
-          // {leftCount: 8, type: 'number', valueList: [1, 2, 3, 4, 5]};
           setWishPick({leftCount: wishPick.leftCount -1, type: 'color', valueList: setWishPickList('color')});
         }
         else if(bo.txt === '0' || bo.txt === 0){
           setWishPick({leftCount: wishPick.leftCount -1, type: 'number', valueList: setWishPickList('number')});
         }
 
-
+        let pickedCount = setPickedValue(bo);
         let copyDiceBoxes = [...diceBoxes];
         setRoulette(copyDiceBoxes);
 
         if(pickedCount === 2){
-          setDiceState("play-tableCross");
-          
-          if(howManyTaken() === 2) msgServerWithId("dice-picked", copyDiceBoxes);
-          else setCanIRollNext(true);
+          setGameStatus("play-tableCross");
+          setRollerText("Turn Over");
+
+          if(whatStepOfDices() === 2) setCanIRollNext(true);
+          else msgServerWithId("dice-picked", copyDiceBoxes);
         }
       }
       
     }
 
+  }
+
+  function handleChange(){
+    let e = document.getElementById("special-id");
+    let value = e.options[e.selectedIndex].value;
+    let colorList = ['b', 'g', 'o', 'p', 'y'];
+    let whichType = 'number';
+    if(colorList.includes(value)) whichType = 'color';
+
+    setSpecialValue(whichType, value);
   }
 
   function mainTableButtonCrossCheck (bo, i, j){
@@ -295,12 +312,12 @@ const App = () => {
         <div className="gap-vertical-space"></div>
 
         <div className="right-side">
-          <div className="wish-pick"><Exclamations wishPick={wishPick}/></div>
+          <div className="wish-pick"><Exclamations wishPick={wishPick} handleChange={handleChange}/></div>
           <div className="gap-horizontal-space-right"></div>
           <div className='right-lower-end'>
             <div className='dice-roulette'>
               <div className="dice-roll"><DiceBoxes randomDiceRoll={roulette} handleButton={buttonClick}/></div>
-              <div className='dice-roller'><RouletteBox diceRoll={buttonClick}/></div>
+              <div className='dice-roller'><RouletteBox rollerText={rollerText} diceRoll={buttonClick}/></div>
             </div>
             <div className="final-scores"><AllScores finalScore={finalScore}/></div>
           </div>

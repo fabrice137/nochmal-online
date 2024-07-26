@@ -52,7 +52,7 @@ export let starterTable = [
 
 export let starterLetterScore = fillLetterScores();
 export let starterColorScore = fillColorScores();
-export let starterWishScore = {canShow: true, leftCount: 8, type: 'number', valueList: [1, 2, 3, 4, 5]};
+export let starterWishScore = {canShow: true, leftCount: 8, type: 'number', valueList: []};
 
 
 function fillLetterScores(){
