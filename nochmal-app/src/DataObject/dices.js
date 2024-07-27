@@ -38,20 +38,16 @@ export const setPickedValue = (bo) =>{
                 db.taken = true;
             }
         }
-    })
+    });
+}
 
+export const hasDicesBeenPicked = () =>{
     let pickedCount = 0
 
     if(numberPicked !== -1) pickedCount++;
     if(colorPicked !== "white") pickedCount++;
 
-    if(pickedCount === 2){
-        diceBoxes.forEach((d) =>{
-            d.step = 2;
-        })
-    }
-
-    return pickedCount;
+    return pickedCount === 2;
 }
 
 function resetPickedValues(){

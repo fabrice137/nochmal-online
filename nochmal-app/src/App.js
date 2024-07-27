@@ -19,7 +19,7 @@ import {socket, msgServerWithId, putPlayerId, msgReciever} from "./connection.js
 import {starterTable, starterLetterScore, starterColorScore, 
   starterFinalScore, starterWishScore} from "./DataObject/do.js";
 
-import { diceBoxes, setDiceBoxes, setPickedValue, isButtonAllowedByDice, setSpecialValue,
+import { diceBoxes, setDiceBoxes, setPickedValue, hasDicesBeenPicked, isButtonAllowedByDice, setSpecialValue,
   decreasePickCount, getPickCountLeft, whatStepOfDices, setWishPickList } from './DataObject/dices.js';
 
 import {gameAllow, setGameStatus, getGameStatus, canRollDice, setCanIRollNext} from './gamePlay.js';
@@ -96,7 +96,7 @@ const App = () => {
 
       let canCross = isAllowed && mainTableButtonCrossCheck(bo, i, j);
 
-      if(canCross){
+      if( canCross ){
         decreasePickCount();
 
         if(isColumnFullyCrossed(j)) {
@@ -149,17 +149,12 @@ const App = () => {
           setWishPick({leftCount: wishPick.leftCount -1, type: 'number', valueList: setWishPickList('number')});
         }
 
-        let pickedCount = setPickedValue(bo);
+        setPickedValue(bo);
         let copyDiceBoxes = [...diceBoxes];
         setRoulette(copyDiceBoxes);
 
-        if(pickedCount === 2){
-          setGameStatus("play-tableCross");
-          setRollerText("Turn Over");
+        diceCheckDeal();
 
-          if(whatStepOfDices() === 2) setCanIRollNext(true);
-          else msgServerWithId("dice-picked", copyDiceBoxes);
-        }
       }
       
     }
@@ -174,6 +169,22 @@ const App = () => {
     if(colorList.includes(value)) whichType = 'color';
 
     setSpecialValue(whichType, value);
+
+    diceCheckDeal();
+  }
+
+  function diceCheckDeal(){
+    let copyDiceBoxes = [...diceBoxes];
+    setRoulette(copyDiceBoxes);
+
+    if(hasDicesBeenPicked()){
+      setGameStatus("play-tableCross");
+      setRollerText("Turn Over");
+      
+
+      if(whatStepOfDices() === 2) setCanIRollNext(true);
+      else msgServerWithId("dice-picked", copyDiceBoxes);
+    }
   }
 
   function mainTableButtonCrossCheck (bo, i, j){
@@ -222,7 +233,6 @@ const App = () => {
   }
 
   function handleColorCount(bo) {
-    // [{name:"green", count: g, score: 5}, {name:"yellow", count: y, score: 5}, {name:"blue", count: b, score: 5}, {name:"pink", count: p, score: 5}, {name:"orange", count: o, score: 5}];
 
     let newColorCounter = [...colorStats];
     let zeros = 0;
@@ -232,7 +242,7 @@ const App = () => {
       if(cs.count > 0){
 
         if(cs.name.charAt(0) === bo.clr){
-          cs.count = cs.count - 1;
+          cs.count = cs.count--;
         }
         if(cs.count === 0) {
           zeros++;

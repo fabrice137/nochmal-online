@@ -77,6 +77,7 @@ function fillColorScores (){
 
   for(let i=0; i<starterTable.length; i++){
     for(let j=0; j<starterTable[i].length; j++){
+      
       if(starterTable[i][j].clr === "b") b++;
       else if(starterTable[i][j].clr === "g") g++;
       else if(starterTable[i][j].clr === "o") o++;
