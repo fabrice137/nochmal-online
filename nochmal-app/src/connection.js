@@ -5,7 +5,8 @@ import {changeViewableLetterScore, changeViewableColorScore} from './boardUtil.j
 // import {starterTable, starterLetterScore, starterColorStats} from "./DataObject/do.js";
 // import {userData, userDataLetter, userDataColor, serverData, serverDataLetter, serverDataColor} from "./DataObject/do.js";
 import {userData, userDataLetter, userDataColor, diceData} from "./DataObject/do.js";
-import { diceBoxes, setDiceBoxes, setDiceState, setCanIRollNext } from './DataObject/dices.js';
+import { diceBoxes, setDiceBoxes } from './DataObject/dices.js';
+import { setGameStatus, setCanIRollNext } from './gamePlay.js';
 
 import { io } from 'socket.io-client';
 
@@ -90,7 +91,7 @@ export const msgReciever = (setRoulette) =>{
 
       setDiceBoxes(receivedDices);
       setRoulette(diceBoxes);
-      setDiceState(data.step);
+      setGameStatus(data.step);
       setCanIRollNext(true);
     }
   })
@@ -105,7 +106,7 @@ export const msgReciever = (setRoulette) =>{
 
       setDiceBoxes(receivedDices);
       setRoulette(diceBoxes);
-      setDiceState(data.step);
+      setGameStatus(data.step);
     }
   })
 
@@ -120,8 +121,8 @@ export const msgReciever = (setRoulette) =>{
 
     setDiceBoxes(receivedDices);
     setRoulette(diceBoxes);
-    if(data.playerId !== playerId) setDiceState(data.step);
-    else setDiceState("wait");
+    if(data.playerId !== playerId) setGameStatus(data.step);
+    else setGameStatus("wait");
   })
 
 

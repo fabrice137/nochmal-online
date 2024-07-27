@@ -52,7 +52,7 @@ export let starterTable = [
 
 export let starterLetterScore = fillLetterScores();
 export let starterColorScore = fillColorScores();
-export let starterWishScore = {canShow: true, leftCount: 8, type: 'number', valueList: [1, 2, 3, 4, 5]};
+export let starterWishScore = {canShow: true, leftCount: 8, type: 'number', valueList: []};
 
 
 function fillLetterScores(){
@@ -77,6 +77,7 @@ function fillColorScores (){
 
   for(let i=0; i<starterTable.length; i++){
     for(let j=0; j<starterTable[i].length; j++){
+      
       if(starterTable[i][j].clr === "b") b++;
       else if(starterTable[i][j].clr === "g") g++;
       else if(starterTable[i][j].clr === "o") o++;

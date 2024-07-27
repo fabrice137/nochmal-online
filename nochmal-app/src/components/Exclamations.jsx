@@ -1,5 +1,5 @@
 
-const Exclamations = ({wishPick}) => {
+const Exclamations = ({wishPick, handleChange}) => {
 
     let colorMap = new Map();
     if(wishPick.type === 'color'){
@@ -11,28 +11,17 @@ const Exclamations = ({wishPick}) => {
             else if(v === 'y') colorMap.set('y', 'Yellow');
         })
     }
-
-    // let forShow = {leftCount: 8, type: 'number', valueList: [1, 2, 3, 4, 5]};   className={wishPick.canShow ? '' : 'hide-special'}
     
     return(
         <>
-            <select name="specials" id="special-id">
-                <option value={wishPick.leftCount +" IX"} className="text-wishpick color-item-w">{wishPick.leftCount +" IX"}</option>
+            <select name="specials" id="special-id" onChange={handleChange}>
+                <option value={wishPick.leftCount +" IX"} className="text-wishpick color-item-w" selected>{wishPick.leftCount +" IX"}</option>
                 {
                     wishPick.valueList.map((e) => (
-                        <option value={e} className={"text-wishpick color-item-"+ e}>{colorMap.get(e)}</option>
+                        <option value={e} className={"text-wishpick color-item-"+ e}>{(wishPick.type === 'color') ? colorMap.get(e) : e}</option>
                     ))
                 }
             </select>
-            {/* <div className={wishPick.canShow ? 'hide-special' : ''}><span>{wishPick.leftCount +" IX."}</span></div> */}
-            {/* <select name="specials" id="special-id" className={wishPick.canShow ? 'hide-special' : ''}>
-                <option value={wishPick.leftCount +" IX"} className="text-wishpick color-item-w">{wishPick.leftCount +" IX"}</option>
-                {
-                    forShow.valueList.map((e) => (
-                        <option value={e} className={"text-wishpick color-item-"+ e}>{colorMap.get(e)}</option>
-                    ))
-                }
-            </select> */}
         </>
     )
 }

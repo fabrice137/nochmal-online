@@ -19,7 +19,7 @@ const Rectangle = ({bo}) => {
 
     if(bo.pos === "colorScore"){
         className += 'color-score-left color-item-'+ bo.clr;
-        if(bo.sta === 1){
+        if(bo.sta === 0){
             className += ' score-done';
         }
     }
