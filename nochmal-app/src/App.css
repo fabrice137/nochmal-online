@@ -1,7 +1,11 @@
 
 /* STRUCTURE-LAYOUT STARTS    STRUCTURE-LAYOUT STARTS    STRUCTURE-LAYOUT STARTS */
 
-.application-body{
+/* .body-part{
+  border: 3px solid yellow;
+} */
+
+.game-body{
   margin-top: 50px;
   display: flex;
   flex-direction: row;

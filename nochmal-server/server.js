@@ -42,23 +42,35 @@ io.on('connection', Socket =>{
         let isFirst = game.canScoreColorFirst(data.colorTaken, data.playerId);
         console.log("On-colortaken: [ Color: "+ data.colorTaken +" , IsFirst: "+ isFirst +", PlayerId: "+ data.playerId +" ]");
 
-        Socket.broadcast.emit("takenColor-score", {playerId: data.playerId, colorTaken: data.colorTaken, isFirst: isFirst});  
+        if(isFirst){
+            let howMany = get5ScoreColorById(data.playerId);
+            if(howMany === 2){
+                gameOver(game.getWinner);
+            }
+            else {
+                Socket.broadcast.emit("takenColor-score", {playerId: data.playerId, colorTaken: data.colorTaken, isFirst: isFirst}); 
+            }
+        }
+        else{
+            Socket.broadcast.emit("takenColor-score", {playerId: data.playerId, colorTaken: data.colorTaken, isFirst: isFirst}); 
+        }
+         
+    })
+
+    Socket.on("score-report", data =>{
+        game.addPlayerScore(data.playerId, data.totalScore);  
     })
 
 
 
 
     Socket.on("dice-rolled", data =>{
-        // console.log("On-diceroll: "+ data.dices +", PlayerId: "+ data.playerId);
-
         game.setCurrentRoller(data.playerId);
         Socket.broadcast.emit("roll-dice", {playerId: data.playerId, dices: data.dices, step: "wait"});  
     })
 
 
     Socket.on("dice-picked", data =>{
-        // console.log("On-diceroll: "+ data.dices +", PlayerId: "+ data.playerId);
-
         Socket.broadcast.emit("picked-dice", {playerId: data.playerId, dices: data.dices, step: "play-dicePick"});  
     })
 
@@ -75,22 +87,7 @@ io.on('connection', Socket =>{
     })
 
 
-    
-
-
-    
-    Socket.on("game-end", (finalScores, room, player) =>{
-        console.log("On-endgame: "+ endMessage);
-
-        let index = findGameIndex(room);
-        if(index >= 0){
-            let areAllScoresIn = gameArray[index].addPlayerScore(player.id, finalScores);
-
-            if(areAllScoresIn){
-                if(room === "") Socket.broadcast.emit("none", "");
-                else Socket.to(room).emit("ending-game", gameArray[index].getFinalScores());  
-            }
-                 
-        }
-    })
+    function gameOver(winner){
+        Socket.broadcast.emit("game-over", {stage: 'over', winner: winner});
+    }
 }) 

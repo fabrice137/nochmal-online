@@ -97,8 +97,9 @@ function fillColorScores (){
 
 
 export let userData = {playerId: 'playerId', msg: 'msg'};
-export let userDataLetter = {playerId: 'playerId', letterTaken: ''}
-export let userDataColor = {playerId: 'playerId', colorTaken: ''}
+export let userDataLetter = {playerId: 'playerId', letterTaken: ''};
+export let userDataColor = {playerId: 'playerId', colorTaken: ''};
+export let userDataScore = {playerId: 'playerId', totalScore: 0};
 
 export let serverData = {playerId: 'playerId', msg: ''};
 export let serverDataLetter = {playerId: 'playerId', letterTaken: '', isFirst: true};

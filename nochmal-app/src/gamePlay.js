@@ -1,5 +1,5 @@
 // [Single, Multiple, Official, Test-MainTable, Test-Dice, Test]
-let GameMode = "Multiple"; 
+let GameMode = "Test"; 
 export const gameAllow = (value) =>{
     if(GameMode === "Test") return true;
     else if(GameMode === "Test-MainTable") return true;
