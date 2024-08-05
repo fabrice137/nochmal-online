@@ -68,13 +68,13 @@ const App = () => {
         
         btn.sta = 1;
         isChanged = true;
-        viewableScore = btn.txt
+        viewableScore = parseInt(btn.txt);
       }
     })
 
 
     if(isChanged) {
-      // if(didScore) setNewFinalScore("letters", viewableMark);
+      setNewFinalScore("letters", viewableScore);
       setLetterScore(prevLetterScore);
       // send something to server
       if(viewableScore !== getLowScore(letter)) msgServerWithId("score-letterTaken", letter);
@@ -92,9 +92,9 @@ const App = () => {
       j = getColumnIndex(bo.id.charAt(0));
 
       // check if button clicked is even allowed based on the dice rolled
-      let isAllowed =getGameStatus !== "play-tableCross" && isButtonAllowedByDice(bo);
+      let isAllowed = gameAllow( (getGameStatus !== "play-tableCross") && isButtonAllowedByDice(bo) );
 
-      let canCross = isAllowed && mainTableButtonCrossCheck(bo, i, j);
+      let canCross = isAllowed ? mainTableButtonCrossCheck(bo, i, j) : false;
 
       if( canCross ){
         decreasePickCount();
@@ -107,9 +107,6 @@ const App = () => {
         let leftPicks = getPickCountLeft();
         if(leftPicks === 0) {
           setGameStatus("re-roll");
-
-          // let time = Math.floor(Date.now() / 1000); // number of seconds since Unix epoch
-          // msgServerWithId("waiting-for-reroll", time)
         }
       }
     }
@@ -169,6 +166,7 @@ const App = () => {
     if(colorList.includes(value)) whichType = 'color';
 
     setSpecialValue(whichType, value);
+    setNewFinalScore("optionals", 1);
 
     diceCheckDeal();
   }
@@ -188,16 +186,11 @@ const App = () => {
   }
 
   function mainTableButtonCrossCheck (bo, i, j){
-    // let str = "T["+ i +"]["+ j +"]: "+ bo.id;
     let canCross = false;
-
-
 
     if(isGameStarted){
       if(isNextToCrossed(i, j)){
         singleButtonChange(bo, i, j);
-        // str += ", "+ JSON.stringify(boxes[i][j]);
-
         canCross = true;
       }
     }
@@ -207,13 +200,9 @@ const App = () => {
         singleButtonChange(bo, i, j);
         // join game in server
         msgServerWithId("game-start", playerId);
-        // str += ", "+ JSON.stringify(boxes[i][j]);
-
         canCross = true;
       }
     }
-    // console.log(str);
-
     return canCross;
   }
   
@@ -228,42 +217,43 @@ const App = () => {
     bo.sta = 1;
     boxTick(bo, i, j);
     setBoxes(starterTable);
-
-    // msgServerWithId("test-client", "Button: ["+ i +","+ j +"]");
   }
 
   function handleColorCount(bo) {
 
     let newColorCounter = [...colorStats];
-    let zeros = 0;
-    let colorName = "xx";
+    let scoreToBeAdded = 0;
+    let colorName = "none";
 
     newColorCounter.forEach(cs => {
       if(cs.count > 0){
 
         if(cs.name.charAt(0) === bo.clr){
-          cs.count = cs.count--;
-        }
-        if(cs.count === 0) {
-          zeros++;
-          
-          if(cs.score === 5) colorName = cs.name;
-          if(zeros === 2){
-            // end game end-game game over game-over game finish send signal
+          cs.count = cs.count - 1;
+
+          if(cs.count === 0){
+            if(cs.score === 5){
+              colorName = cs.name;
+              scoreToBeAdded = 5;
+            }
+            else{
+              scoreToBeAdded = 3;
+            }
+            
           }
         }
-      }
-      else if(cs.count === 0){
-        zeros++;
       }
       
     })
 
     setColorStats(newColorCounter);
-    if(zeros > 0) setNewFinalScore("colors", (zeros * 5));
+    if(scoreToBeAdded > 0) {
+      setNewFinalScore("colors", scoreToBeAdded);
 
-    // send something to server
-    if(colorName !== "xx") msgServerWithId("score-colorTaken", colorName);
+      // send something to server
+      if(colorName !== "none") msgServerWithId("score-colorTaken", colorName);
+    }
+
   }
 
   function setNewFinalScore(field, scoreToAdd) {
@@ -296,6 +286,8 @@ const App = () => {
 
     fs.total = (fs.colors + fs.letters + fs.optionals + fs.stars);
     setFinalScore(fs);
+
+    msgServerWithId("score-report", fs.total);
   }
 
   
@@ -306,7 +298,8 @@ const App = () => {
 
   return (
     <div className="App" >
-      <div className="application-body">
+      <div className='first-level body-part'></div>
+      <div className="game-body">
         <div className="left-side">
           <div className="color-score-col"><ColorScore colorStats={colorStats}/></div>
         </div>
@@ -331,9 +324,10 @@ const App = () => {
             </div>
             <div className="final-scores"><AllScores finalScore={finalScore}/></div>
           </div>
-          
         </div>
       </div>
+      <div className='third-level body-part'></div>
+
       {/* <div className='devlogs'>{logConsole}</div> */}
 
     </div>

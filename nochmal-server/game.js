@@ -2,11 +2,14 @@
 const roomId = "roomId0912883";
 let playerSet = new Set();
 let scoreByPlayerId = new Map();
+let twoColorsByPlayerId = new Map();
 
 let cyclePlayerInWaitRerollSet = new Set();
 
 let tempCycleRollSet = new Set(); // those already rolled in the current cycle
 let currentRoller = '';
+
+let winner = {playerId: '', totalScore: 0};
 
 // let letterScore = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
 let letterScoreById = new Map();
@@ -20,6 +23,14 @@ let colorScoreById = new Map();
     colorScoreById.set(color, "noId");
 })
 
+function get5ScoreColorById(playerId){
+    let lastColorCount = twoColorsByPlayerId.get(playerId);
+    if(lastColorCount && lastColorCount === 1) return 2;
+    else {
+        twoColorsByPlayerId.set(playerId, 1);
+        return 1;
+    }
+}
 
 function addToSet(playerId, whichSet) {
     if(whichSet === "cyclePlayerInWaitRerollSet") cyclePlayerInWaitRerollSet.add(playerId);
@@ -66,6 +77,12 @@ function getPlayerCount(){
 
 function addPlayerScore(playerId, score){
     scoreByPlayerId.set(playerId, score);
+
+    if(winner.totalScore < score){
+        winner.playerId = playerId;
+        winner.totalScore = score;
+    }
+
     if(scoreByPlayerId.size === playerSet.size) return true;
     else return false;
 }
@@ -86,9 +103,13 @@ function canScoreColorFirst(color, playerId){
     else return false;
 }
 
-function getFinalScores(){
-    return Object.entries(scoreByPlayerId).sort((a, b) => a[1] - b[1]); // sort by scores
+function getWinner(){
+    return winner;
 }
+
+// function getFinalScores(){
+//     return Object.entries(scoreByPlayerId).sort((a, b) => a[1] - b[1]); // sort by scores
+// }
 
 
 
@@ -100,7 +121,8 @@ module.exports = {
     addPlayerScore,
     canScoreLetterFirst,
     canScoreColorFirst,
-    getFinalScores,
+    getWinner,
+    get5ScoreColorById,
 
     addToSet, getRollSetCount, resetRollSet, setCurrentRoller, getNextRoller
 };

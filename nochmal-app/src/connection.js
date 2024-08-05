@@ -1,10 +1,6 @@
-
-// import React, { useState, useEffect  } from 'react';
 import {changeViewableLetterScore, changeViewableColorScore} from './boardUtil.js';
 
-// import {starterTable, starterLetterScore, starterColorStats} from "./DataObject/do.js";
-// import {userData, userDataLetter, userDataColor, serverData, serverDataLetter, serverDataColor} from "./DataObject/do.js";
-import {userData, userDataLetter, userDataColor, diceData} from "./DataObject/do.js";
+import {userData, userDataLetter, userDataColor, userDataScore, diceData} from "./DataObject/do.js";
 import { diceBoxes, setDiceBoxes } from './DataObject/dices.js';
 import { setGameStatus, setCanIRollNext } from './gamePlay.js';
 
@@ -24,14 +20,8 @@ export const putPlayerId = () =>{
   userDataLetter.playerId = playerId;
   userDataColor.playerId = playerId;
   diceData.playerId = playerId;
+  userDataScore.playerId = playerId;
 }
-
-
-// const joinRoom = (room) =>{
-//   if(room !== ""){
-//     socket.emit("join-room", room);
-//   }
-// }
 
 export const msgServerWithId = (msgTitle, msg) =>{
   userData.msg = msg;
@@ -58,6 +48,10 @@ export const msgServerWithId = (msgTitle, msg) =>{
   else if(msgTitle === "waiting-for-reroll"){
     socket.emit("waiting-for-reroll", userData);
   }
+  else if(msgTitle === "score-report"){
+    userDataScore.totalScore = msg;
+    socket.emit("score-report", userDataScore);
+  }
 }
 
 
@@ -72,6 +66,18 @@ export const msgReciever = (setRoulette) =>{
   socket.on("takenColor-score", (data) =>{
     // only changes on those that did not yet score the color 
     changeViewableColorScore(data);
+  })
+
+  socket.on("game-over", (data) =>{
+    // winner display
+    if(data.playerId === playerId){
+      // is the winner
+      alert("Congratulations !! You are the winner with \n"+ data);
+    }
+    else {
+      // is not the winner
+      alert("Sorry you lost !! The winner is \n"+ data);
+    }
   })
   
   socket.on("client-tested", (msg) =>{
