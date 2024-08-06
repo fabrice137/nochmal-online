@@ -22,7 +22,7 @@ import {starterTable, starterLetterScore, starterColorScore,
 import { diceBoxes, setDiceBoxes, setPickedValue, hasDicesBeenPicked, isButtonAllowedByDice, setSpecialValue,
   decreasePickCount, getPickCountLeft, whatStepOfDices, setWishPickList } from './DataObject/dices.js';
 
-import {gameAllow, setGameStatus, getGameStatus, canRollDice, setCanIRollNext} from './gamePlay.js';
+import {gameAllow, gameAllows, setGameStatus, getGameStatus, canRollDice, setCanIRollNext} from './gamePlay.js';
 
 
   // https://github.com/WebDevSimplified/Learn-React-In-30-Minutes/blob/master/src/App.js
@@ -92,7 +92,7 @@ const App = () => {
       j = getColumnIndex(bo.id.charAt(0));
 
       // check if button clicked is even allowed based on the dice rolled
-      let isAllowed = gameAllow( (getGameStatus !== "play-tableCross") && isButtonAllowedByDice(bo) );
+      let isAllowed = gameAllow( (getGameStatus() !== "play-tableCross") && isButtonAllowedByDice(bo) );
 
       let canCross = isAllowed ? mainTableButtonCrossCheck(bo, i, j) : false;
 
@@ -121,7 +121,8 @@ const App = () => {
           setWishPick({leftCount: wishPick.leftCount, type: 'number', valueList: []});
           
           setGameStatus("play-dicePick");
-          setCanIRollNext(false);
+          // setCanIRollNext(false);
+          setCanIRollNext(gameAllows("no-server", false)); // if server is working change it to server
 
           msgServerWithId("dice-rolled", diceBoxes);
         }
