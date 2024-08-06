@@ -5,8 +5,9 @@ import { diceBoxes, setDiceBoxes } from './DataObject/dices.js';
 import { setGameStatus, setCanIRollNext } from './gamePlay.js';
 
 import { io } from 'socket.io-client';
+require("dotenv").config();
 
-const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4000';
+const URL = process.env.NODE_ENV === 'production' ? 'http://94.177.9.30:4000' : 'http://localhost:4000';
 export const socket = io(URL);
 
 

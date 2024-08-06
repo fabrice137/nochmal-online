@@ -6,6 +6,13 @@ export const gameAllow = (value) =>{
     else return value;
 }
 
+export const gameAllows = (status, value) =>{
+    if(GameMode === "Test") return true;
+    else if(GameMode === "Test-MainTable") return true;
+    else if (status === "no-server") return true;
+    else return value;
+}
+
 // states: dice-rolled --->> wait -> play(play-dicePick -> play-tableCross) -> re-roll
 let gameStatus = "init";
 

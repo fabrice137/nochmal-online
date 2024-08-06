@@ -1,9 +1,13 @@
 const { Socket } = require('socket.io');
 const game = require('./game.js');
+require("dotenv").config();
+
+
+const PORT = process.env.NODE_ENV === 'production' ? process.env.PROD_PORT : process.env.DEV_PORT;
 
 const io = require('socket.io')(4000, {
     cors: {
-        origin: ["http://localhost:3000"],
+        origin: [PORT],
     }
 });
 
